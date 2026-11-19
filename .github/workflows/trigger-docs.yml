@@ -1,0 +1,42 @@
+# Reusable workflow: asks Vercel to rebuild docs.aion-asa.com.
+# It is NOT triggered in this repo: each product repo calls it from its own
+# .github/workflows/docs-deploy.yml (template in this repo's README), which decides
+# WHEN to run (branch + paths). The logic lives here, in one place.
+#
+# Requirements:
+#   - org secret DOCS_DEPLOY_HOOK (URL of the Vercel Deploy Hook of this project),
+#     visible to the product repos; callers pass it with `secrets: inherit`
+#   - this repo: Settings > Actions > General > Access >
+#     "Accessible from repositories in the organization"
+
+name: Trigger Docs Rebuild
+
+on:
+  workflow_call:
+    secrets:
+      DOCS_DEPLOY_HOOK:
+        required: false   # checked below, to fail with a readable message
+
+permissions: {}
+
+jobs:
+  trigger:
+    name: Trigger Portal Rebuild
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # Several merges in a row need one rebuild only: Vercel always clones the
+    # latest main, so a newer run makes the pending one redundant
+    concurrency:
+      group: docs-deploy-${{ github.repository }}
+      cancel-in-progress: true
+    steps:
+      - name: Call Vercel deploy hook
+        env:
+          DOCS_DEPLOY_HOOK: ${{ secrets.DOCS_DEPLOY_HOOK }}
+        run: |
+          if [ -z "$DOCS_DEPLOY_HOOK" ]; then
+            echo "::error::Secret DOCS_DEPLOY_HOOK is not available to this repository (org secret, Selected repositories)."
+            exit 1
+          fi
+          curl -fsS --retry 3 --retry-delay 5 -X POST "$DOCS_DEPLOY_HOOK" > /dev/null
+          echo "Rebuild of docs.aion-asa.com requested by $GITHUB_REPOSITORY."

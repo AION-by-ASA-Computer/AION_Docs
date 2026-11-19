@@ -1,0 +1,14 @@
+{
+  "siteUrl": "https://docs.aion-asa.com",
+  "owner": "AION-by-ASA-Computer",
+  "products": [
+    {
+      "repo": "AION_Agent",
+      "branch": "main",
+      "siteDir": "website",
+      "path": "agents",
+      "name": "AION Agents",
+      "description": "Guida per utenti, amministratori e sviluppatori di AION Agents: installazione, configurazione, API e integrazioni."
+    }
+  ]
+}
