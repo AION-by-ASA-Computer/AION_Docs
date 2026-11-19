@@ -51,9 +51,32 @@ const escapeHtml = (s) =>
 // - test in locale: la repo locale stessa, compilata sul posto (nessuna copia;
 //   la build finisce in <siteDir>/build, che è già ignorata da git)
 // - altrimenti: clone da GitHub dentro TMP
+// Cerca il clone locale della repo in LOCAL_REPOS_DIR: prima la cartella con lo stesso
+// nome, poi qualunque cartella il cui remote "origin" punti a <owner>/<repo>
+// (così funziona anche se la cartella locale ha un nome diverso, es. dopo un rename)
+function findLocalRepo(repo) {
+  if (!localDir) return null;
+  const base = path.resolve(localDir);
+  const isGit = (d) => fs.existsSync(path.join(d, '.git'));
+  const same = path.join(base, repo);
+  if (isGit(same)) return same;
+  const wanted = new RegExp(`[/:]${owner}/${repo}(\\.git)?/?$`, 'i');
+  for (const name of fs.readdirSync(base)) {
+    const dir = path.join(base, name);
+    if (!isGit(dir)) continue;
+    try {
+      const url = execSync('git remote get-url origin', { cwd: dir, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim();
+      if (wanted.test(url)) return dir;
+    } catch {
+      // cartella senza remote "origin": la ignoro
+    }
+  }
+  return null;
+}
+
 function fetchRepo(p) {
-  const local = localDir && path.resolve(localDir, p.repo);
-  if (local && fs.existsSync(path.join(local, '.git'))) {
+  const local = findLocalRepo(p.repo);
+  if (local) {
     console.log(`\nUso la repo locale (build sul posto): ${local}`);
     return { dir: local, isLocal: true };
   }

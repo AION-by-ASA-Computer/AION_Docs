@@ -8,7 +8,7 @@ Questa repo, a ogni build, scarica quelle cartelle, le compila e le pubblica com
 | Percorso | Repo |
 |---|---|
 | `/` | pagina di ingresso (`landing/`) |
-| `/agents/` | AION_Agent |
+| `/agents/` | AION_Agents |
 
 ## File
 

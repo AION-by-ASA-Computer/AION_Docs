@@ -3,7 +3,7 @@
   "owner": "AION-by-ASA-Computer",
   "products": [
     {
-      "repo": "AION_Agent",
+      "repo": "AION_Agents",
       "branch": "main",
       "siteDir": "website",
       "path": "agents",
