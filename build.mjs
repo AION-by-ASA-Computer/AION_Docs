@@ -148,9 +148,22 @@ const cards = built
       </a>`
   )
   .join('\n');
+const landing = template.replace('{{CARDS}}', cards).replace('{{YEAR}}', String(new Date().getFullYear()));
+fs.writeFileSync(path.join(DIST, 'index.html'), landing);
+
+// --- pagina 404 ---
+// Vercel mostra solo /404.html (alla radice) per qualunque percorso inesistente,
+// anche dentro /<prodotto>/: stessa grafica della landing, con i link ai prodotti
 fs.writeFileSync(
-  path.join(DIST, 'index.html'),
-  template.replace('{{CARDS}}', cards).replace('{{YEAR}}', String(new Date().getFullYear()))
+  path.join(DIST, '404.html'),
+  landing
+    .replace('<title>Documentazione AION</title>', '<title>Pagina non trovata · Documentazione AION</title>')
+    .replace('<meta name="description"', '<meta name="robots" content="noindex">\n  <meta name="description"')
+    .replace('<h1>Documentazione AION</h1>', '<h1>Pagina non trovata</h1>')
+    .replace(
+      '<p>Scegli il prodotto di cui vuoi consultare la documentazione.</p>',
+      '<p>La pagina che cerchi non esiste o è stata spostata. Riparti dalla documentazione del prodotto.</p>'
+    )
 );
 
 // --- sitemap indice + robots ---

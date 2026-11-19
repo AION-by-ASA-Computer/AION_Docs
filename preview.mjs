@@ -48,7 +48,8 @@ http
     }
     const file = findFile(url.pathname);
     if (!file) {
-      const nf = findFile(url.pathname.split('/').slice(0, 2).join('/') + '/404.html') || findFile('/404.html');
+      // Come Vercel: per qualunque percorso inesistente usa solo /404.html (alla radice)
+      const nf = findFile('/404.html');
       res.writeHead(404, { 'Content-Type': TYPES['.html'] });
       return res.end(nf ? fs.readFileSync(nf) : 'Not found');
     }
