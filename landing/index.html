@@ -3,49 +3,458 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Documentazione AION</title>
-  <meta name="description" content="Documentazione ufficiale dei prodotti AION.">
+  <title>{{TITLE}}</title>
+  <meta name="description" content="Documentazione ufficiale dei prodotti AION: guide per utenti, amministratori e sviluppatori. AION by ASA Computer, la suite AI on-premise per le aziende.">
+  {{ROBOTS}}
+  <meta name="theme-color" content="#0a0a0d">
+  <link rel="icon" href="/img/favicon.png">
+  <script>document.documentElement.classList.add('js');</script>
   <style>
+    /* ---------- Colori (brand AION: rosso) ---------- */
     :root {
-      --bg: #0b0d12; --panel: #141821; --border: #232a37;
-      --text: #e8ecf3; --muted: #9aa4b5; --accent: #5b8cff;
+      --bg: #0a0a0d;
+      --bg-2: #111116;
+      --panel: rgba(255, 255, 255, 0.035);
+      --panel-hover: rgba(255, 255, 255, 0.06);
+      --border: rgba(255, 255, 255, 0.09);
+      --border-strong: rgba(255, 255, 255, 0.16);
+      --text: #f2f2f5;
+      --muted: #a0a3ad;
+      --faint: #6b6e78;
+      --accent: #e04545;
+      --accent-2: #ff7a59;
+      --accent-3: #b5179e;
+      --glow: rgba(224, 69, 69, 0.35);
+      --grid: rgba(255, 255, 255, 0.045);
+      --shadow: 0 30px 80px -30px rgba(0, 0, 0, 0.8);
     }
     @media (prefers-color-scheme: light) {
-      :root { --bg: #f6f7fb; --panel: #ffffff; --border: #e2e6ee; --text: #121722; --muted: #5d6677; --accent: #2f5fe0; }
+      :root {
+        --bg: #fbfbfc;
+        --bg-2: #f3f3f6;
+        --panel: rgba(255, 255, 255, 0.75);
+        --panel-hover: #ffffff;
+        --border: rgba(16, 16, 24, 0.09);
+        --border-strong: rgba(16, 16, 24, 0.18);
+        --text: #121218;
+        --muted: #5a5d67;
+        --faint: #8a8d96;
+        --accent: #c93434;
+        --accent-2: #e8603f;
+        --accent-3: #a3148c;
+        --glow: rgba(201, 52, 52, 0.22);
+        --grid: rgba(16, 16, 24, 0.05);
+        --shadow: 0 30px 70px -35px rgba(30, 20, 40, 0.35);
+      }
     }
+
     * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
     body {
-      margin: 0; min-height: 100vh; display: flex; flex-direction: column;
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-      background: var(--bg); color: var(--text);
+      margin: 0; min-height: 100vh; overflow-x: hidden;
+      font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg); color: var(--text); line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
     }
-    header { padding: 72px 24px 40px; text-align: center; }
-    header h1 { margin: 0 0 12px; font-size: clamp(2rem, 4vw, 2.8rem); letter-spacing: -0.02em; }
-    header p { margin: 0; color: var(--muted); font-size: 1.1rem; }
-    main {
-      flex: 1; width: 100%; max-width: 1080px; margin: 0 auto; padding: 0 24px 64px;
-      display: grid; gap: 20px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); align-content: start;
+    a { color: inherit; }
+    .wrap { width: 100%; max-width: 1140px; margin: 0 auto; padding: 0 24px; }
+
+    /* ---------- Sfondo animato ---------- */
+    .bg { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+    .bg canvas { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0.7; }
+    .blob {
+      position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.42;
+      will-change: transform;
+    }
+    .blob.b1 { width: 560px; height: 560px; background: var(--accent); top: -180px; left: -120px; animation: drift1 22s ease-in-out infinite alternate; }
+    .blob.b2 { width: 480px; height: 480px; background: var(--accent-3); top: 10%; right: -160px; opacity: 0.35; animation: drift2 26s ease-in-out infinite alternate; }
+    .blob.b3 { width: 420px; height: 420px; background: var(--accent-2); bottom: -200px; left: 35%; opacity: 0.3; animation: drift3 30s ease-in-out infinite alternate; }
+    @media (prefers-color-scheme: light) { .blob { opacity: 0.22 !important; } }
+    @keyframes drift1 { to { transform: translate(180px, 120px) scale(1.15); } }
+    @keyframes drift2 { to { transform: translate(-140px, 160px) scale(0.9); } }
+    @keyframes drift3 { to { transform: translate(-200px, -120px) scale(1.2); } }
+    .grid {
+      position: absolute; inset: 0;
+      background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+      background-size: 56px 56px;
+      mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 30%, transparent 75%);
+      -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 30%, transparent 75%);
+    }
+
+    /* ---------- Barra in alto ---------- */
+    .nav {
+      position: sticky; top: 0; z-index: 10;
+      backdrop-filter: blur(14px) saturate(140%); -webkit-backdrop-filter: blur(14px) saturate(140%);
+      background: color-mix(in srgb, var(--bg) 70%, transparent);
+      border-bottom: 1px solid transparent; transition: border-color .3s;
+    }
+    .nav.scrolled { border-bottom-color: var(--border); }
+    .nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 68px; }
+    .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+    .brand img { height: 30px; width: auto; display: block; }
+    .brand span { font-size: .92rem; color: var(--muted); padding-left: 12px; border-left: 1px solid var(--border-strong); }
+    .nav-links { display: flex; gap: 6px; }
+    .nav-links a {
+      text-decoration: none; font-size: .92rem; color: var(--muted);
+      padding: 8px 14px; border-radius: 999px; transition: color .2s, background .2s;
+    }
+    .nav-links a:hover { color: var(--text); background: var(--panel-hover); }
+    /* Logo chiaro o scuro in base al tema (selettori forti per battere ".brand img") */
+    img.logo-dark { display: block; } img.logo-light { display: none !important; }
+    @media (prefers-color-scheme: light) { img.logo-dark { display: none !important; } img.logo-light { display: block !important; } }
+
+    /* ---------- Hero ---------- */
+    .hero { padding: 96px 0 72px; text-align: center; }
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 6px 14px 6px 8px; border-radius: 999px;
+      border: 1px solid var(--border); background: var(--panel);
+      font-size: .85rem; color: var(--muted);
+    }
+    .eyebrow .dot {
+      width: 8px; height: 8px; border-radius: 50%; background: var(--accent);
+      box-shadow: 0 0 0 0 var(--glow); animation: pulse 2.4s infinite;
+    }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 var(--glow); } 70% { box-shadow: 0 0 0 10px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
+    h1 {
+      margin: 26px auto 18px; max-width: 900px;
+      font-size: clamp(2.5rem, 6.4vw, 4.6rem); line-height: 1.04; letter-spacing: -0.035em; font-weight: 800;
+    }
+    .grad {
+      background: linear-gradient(100deg, var(--accent) 0%, var(--accent-2) 45%, var(--accent-3) 100%);
+      background-size: 200% auto; -webkit-background-clip: text; background-clip: text; color: transparent;
+      animation: shine 8s linear infinite;
+    }
+    @keyframes shine { to { background-position: 200% center; } }
+    .rotator { display: inline-grid; vertical-align: bottom; }
+    .rotator > span {
+      grid-area: 1 / 1; justify-self: center; white-space: nowrap; opacity: 0; transform: translateY(0.45em); filter: blur(6px);
+      transition: opacity .6s, transform .6s cubic-bezier(.2,.7,.2,1), filter .6s;
+    }
+    .rotator > span.on { opacity: 1; transform: none; filter: none; }
+    .rotator > span.off { opacity: 0; transform: translateY(-0.45em); filter: blur(6px); }
+    .lead { margin: 0 auto; max-width: 660px; font-size: clamp(1.05rem, 1.6vw, 1.2rem); color: var(--muted); }
+    .actions { margin-top: 36px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 10px; text-decoration: none;
+      padding: 13px 22px; border-radius: 12px; font-weight: 600; font-size: .98rem;
+      transition: transform .2s, box-shadow .3s, background .2s, border-color .2s;
+    }
+    .btn svg { width: 18px; height: 18px; transition: transform .25s; }
+    .btn:hover svg { transform: translateX(3px); }
+    .btn-primary {
+      color: #fff; background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 70%, var(--accent-3)));
+      box-shadow: 0 10px 30px -10px var(--glow), inset 0 1px 0 rgba(255,255,255,.2);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 16px 40px -10px var(--glow), inset 0 1px 0 rgba(255,255,255,.2); }
+    .btn-ghost { color: var(--text); border: 1px solid var(--border-strong); background: var(--panel); }
+    .btn-ghost:hover { transform: translateY(-2px); border-color: var(--accent); }
+
+    /* ---------- Sezioni ---------- */
+    section { padding: 40px 0 72px; }
+    .section-head { text-align: center; margin-bottom: 40px; }
+    .kicker { font-size: .8rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+    h2 { margin: 10px 0 12px; font-size: clamp(1.8rem, 3.6vw, 2.6rem); letter-spacing: -0.025em; line-height: 1.15; }
+    .section-head p { margin: 0 auto; max-width: 620px; color: var(--muted); }
+
+    /* ---------- Card prodotti ---------- */
+    .cards {
+      display: grid; gap: 22px; justify-content: center;
+      grid-template-columns: repeat(auto-fit, minmax(290px, 380px));
     }
     .card {
-      display: flex; flex-direction: column; gap: 10px; padding: 24px;
-      background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
-      color: inherit; text-decoration: none; transition: border-color .15s, transform .15s;
+      --mx: 50%; --my: 50%;
+      position: relative; display: flex; flex-direction: column; gap: 14px;
+      padding: 28px; border-radius: 20px; text-decoration: none; color: inherit;
+      background: var(--panel); border: 1px solid var(--border);
+      box-shadow: var(--shadow); overflow: hidden; isolation: isolate;
+      transition: transform .35s cubic-bezier(.2,.7,.2,1), border-color .3s;
     }
-    .card:hover { border-color: var(--accent); transform: translateY(-2px); }
-    .card h2 { margin: 0; font-size: 1.25rem; }
-    .card p { margin: 0; color: var(--muted); line-height: 1.5; flex: 1; }
-    .card .go { color: var(--accent); font-weight: 600; font-size: .95rem; }
-    footer { padding: 24px; text-align: center; color: var(--muted); font-size: .9rem; }
+    .card::before {
+      content: ""; position: absolute; inset: 0; z-index: -1; opacity: 0; transition: opacity .3s;
+      background: radial-gradient(420px circle at var(--mx) var(--my), var(--glow), transparent 45%);
+    }
+    .card::after {
+      content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px; z-index: -1;
+      background: radial-gradient(260px circle at var(--mx) var(--my), var(--accent), transparent 60%);
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor; mask-composite: exclude; opacity: 0; transition: opacity .3s;
+    }
+    .card:hover { transform: translateY(-6px); border-color: transparent; }
+    .card:hover::before, .card:hover::after { opacity: 1; }
+    .card-top { display: flex; align-items: center; justify-content: space-between; }
+    .card-icon {
+      width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center;
+      font-weight: 800; font-size: 1.25rem; color: #fff;
+      background: linear-gradient(135deg, var(--accent), var(--accent-3));
+      box-shadow: 0 8px 24px -8px var(--glow);
+    }
+    .card-path {
+      font-family: ui-monospace, "Cascadia Code", Consolas, monospace; font-size: .8rem; color: var(--faint);
+      padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border);
+    }
+    .card h3 { margin: 6px 0 0; font-size: 1.4rem; letter-spacing: -0.015em; }
+    .card p { margin: 0; color: var(--muted); flex: 1; }
+    .card-go { display: inline-flex; align-items: center; gap: 8px; margin-top: 6px; font-weight: 600; color: var(--accent); }
+    .card-go svg { width: 18px; height: 18px; transition: transform .25s; }
+    .card:hover .card-go svg { transform: translateX(5px); }
+
+    /* ---------- Chi è AION ---------- */
+    .about-box {
+      position: relative; border-radius: 28px; padding: clamp(28px, 5vw, 56px);
+      background: linear-gradient(160deg, var(--panel), transparent 70%);
+      border: 1px solid var(--border); overflow: hidden;
+    }
+    .about-box::before {
+      content: ""; position: absolute; width: 520px; height: 520px; right: -200px; top: -260px;
+      background: radial-gradient(circle, var(--glow), transparent 65%); pointer-events: none;
+    }
+    .about-grid { display: grid; gap: 40px; grid-template-columns: 1.05fr 1fr; align-items: center; position: relative; }
+    .about-text h2 { margin-top: 10px; }
+    .about-text p { color: var(--muted); margin: 0 0 14px; }
+    .about-text a.more { display: inline-flex; gap: 8px; align-items: center; color: var(--accent); font-weight: 600; text-decoration: none; margin-top: 6px; }
+    .about-text a.more:hover { text-decoration: underline; }
+    .features { display: grid; gap: 14px; grid-template-columns: 1fr 1fr; }
+    .feature {
+      padding: 20px; border-radius: 16px; background: var(--panel); border: 1px solid var(--border);
+      transition: transform .3s, border-color .3s;
+    }
+    .feature:hover { transform: translateY(-3px); border-color: var(--border-strong); }
+    .feature svg { width: 26px; height: 26px; color: var(--accent); }
+    .feature h4 { margin: 12px 0 6px; font-size: 1rem; }
+    .feature p { margin: 0; font-size: .9rem; color: var(--muted); line-height: 1.5; }
+
+    /* ---------- Footer ---------- */
+    footer { border-top: 1px solid var(--border); padding: 32px 0 40px; color: var(--faint); font-size: .9rem; }
+    footer .wrap { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between; }
+    footer img { height: 22px; width: auto; display: block; opacity: .9; }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--text); }
+
+    /* ---------- Comparsa allo scroll ---------- */
+    /* Solo con JavaScript attivo (classe "js" su <html>): senza JS tutto resta visibile */
+    .js .reveal { opacity: 0; transform: translateY(26px); transition: opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); transition-delay: var(--d, 0s); }
+    .js .reveal.in { opacity: 1; transform: none; }
+
+    /* ---------- Pagina 404: niente presentazione, card in evidenza ---------- */
+    .is-404 .about, .is-404 .nav-links .about-link, .is-404 .rotator-wrap { display: none; }
+    .is-404 .hero { padding-bottom: 40px; }
+
+    @media (max-width: 860px) {
+      .about-grid { grid-template-columns: 1fr; }
+      .nav-links a.hide-sm { display: none; }
+      .brand span { display: none; }
+    }
+    @media (max-width: 520px) {
+      .features { grid-template-columns: 1fr; }
+      .hero { padding-top: 56px; }
+      h1 { font-size: 2.3rem; }
+      .rotator { display: grid; width: 100%; }
+      .rotator > span { white-space: normal; }
+      .hide-xs { display: none; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+      .js .reveal { opacity: 1; transform: none; }
+      html { scroll-behavior: auto; }
+    }
   </style>
 </head>
-<body>
-  <header>
-    <h1>Documentazione AION</h1>
-    <p>Scegli il prodotto di cui vuoi consultare la documentazione.</p>
+<body class="{{PAGE_CLASS}}">
+  <div class="bg" aria-hidden="true">
+    <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+    <div class="grid"></div>
+    <canvas id="net"></canvas>
+  </div>
+
+  <header class="nav" id="nav">
+    <div class="wrap">
+      <a class="brand" href="/" aria-label="Documentazione AION, home">
+        <img class="logo-dark" src="/img/aion-logo-dark.svg" alt="AION" width="89" height="30">
+        <img class="logo-light" src="/img/aion-logo-light.png" alt="AION" width="89" height="30">
+        <span>Documentazione</span>
+      </a>
+      <nav class="nav-links">
+        <a href="/#prodotti">Prodotti</a>
+        <a class="about-link hide-sm" href="/#chi-siamo">Chi è AION</a>
+        <a href="https://aion-asa.com" target="_blank" rel="noopener">aion-asa.com ↗</a>
+      </nav>
+    </div>
   </header>
+
   <main>
+    <section class="hero">
+      <div class="wrap">
+        <div class="eyebrow reveal"><span class="dot"></span>AION by ASA Computer<span class="hide-xs">&nbsp;· Documentazione ufficiale</span></div>
+        <h1 class="reveal" style="--d:.08s">{{HERO_TITLE}}</h1>
+        <p class="lead reveal" style="--d:.16s">{{HERO_TEXT}}</p>
+        <div class="actions reveal" style="--d:.24s">
+          <a class="btn btn-primary" href="#prodotti">Esplora la documentazione
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
+          <a class="btn btn-ghost" href="https://aion-asa.com" target="_blank" rel="noopener">Scopri AION</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="prodotti">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div class="kicker">Prodotti</div>
+          <h2>Scegli da dove iniziare</h2>
+          <p>Ogni prodotto ha la sua guida completa: installazione, configurazione, utilizzo quotidiano, API e integrazioni.</p>
+        </div>
+        <div class="cards">
 {{CARDS}}
+        </div>
+      </div>
+    </section>
+
+    <section id="chi-siamo" class="about">
+      <div class="wrap">
+        <div class="about-box reveal">
+          <div class="about-grid">
+            <div class="about-text">
+              <div class="kicker">Chi è AION</div>
+              <h2>L'AI lavora in azienda.<br><span class="grad">I dati non escono.</span></h2>
+              <p><strong>AION</strong> è la suite di intelligenza artificiale on-premise sviluppata da <strong>ASA Computer</strong>. Modelli e agenti girano su macchine di proprietà dell'azienda, nella sua sede, e lavorano con i documenti e i sistemi che usa ogni giorno.</p>
+              <p>Sviluppiamo sistemi di AI che si integrano nei processi aziendali, non viceversa: dal service desk all'analisi dei server, dalla gestione degli asset alla consultazione della conoscenza interna.</p>
+              <a class="more" href="https://aion-asa.com" target="_blank" rel="noopener">Visita aion-asa.com
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg></a>
+            </div>
+            <div class="features">
+              <div class="feature reveal" style="--d:.05s">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 7.5h.01M7 16.5h.01"/></svg>
+                <h4>On-premise</h4>
+                <p>Tutto gira sui server dell'azienda, senza dipendere dal cloud.</p>
+              </div>
+              <div class="feature reveal" style="--d:.12s">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/></svg>
+                <h4>Dati al sicuro</h4>
+                <p>Documenti e conversazioni restano nel perimetro aziendale.</p>
+              </div>
+              <div class="feature reveal" style="--d:.19s">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="5" width="14" height="14" rx="3"/><path d="M9 9h6v6H9zM9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/></svg>
+                <h4>Modelli AION</h4>
+                <p>Modelli open-source ottimizzati per girare in locale con alta qualità.</p>
+              </div>
+              <div class="feature reveal" style="--d:.26s">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/><path d="M8 7.5 10.5 16M16 7.5 13.5 16M8.5 6h7"/></svg>
+                <h4>Integrata</h4>
+                <p>Si collega a Microsoft 365, ERP, database e strumenti aziendali.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   </main>
-  <footer>© {{YEAR}} AION · <a href="https://aion-asa.com" style="color:inherit">aion-asa.com</a></footer>
+
+  <footer>
+    <div class="wrap">
+      <a href="/" aria-label="Home">
+        <img class="logo-dark" src="/img/aion-logo-dark.svg" alt="AION" width="65" height="22">
+        <img class="logo-light" src="/img/aion-logo-light.png" alt="AION" width="65" height="22">
+      </a>
+      <div>© {{YEAR}} AION by ASA Computer Srl · <a href="https://aion-asa.com" target="_blank" rel="noopener">aion-asa.com</a></div>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      // Bordo della barra in alto quando si scorre
+      var nav = document.getElementById('nav');
+      var onScroll = function () { nav.classList.toggle('scrolled', window.scrollY > 8); };
+      window.addEventListener('scroll', onScroll, { passive: true }); onScroll();
+
+      // Comparsa degli elementi quando entrano nello schermo
+      var items = document.querySelectorAll('.reveal');
+      if (reduce || !('IntersectionObserver' in window)) {
+        items.forEach(function (el) { el.classList.add('in'); });
+      } else {
+        var io = new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+        }, { threshold: 0.12 });
+        items.forEach(function (el) { io.observe(el); });
+      }
+
+      // Luce che segue il mouse sulle card
+      document.querySelectorAll('.card').forEach(function (card) {
+        card.addEventListener('pointermove', function (e) {
+          var r = card.getBoundingClientRect();
+          card.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+          card.style.setProperty('--my', (e.clientY - r.top) + 'px');
+        });
+      });
+
+      // Parola che cambia nel titolo
+      var rot = document.querySelector('.rotator');
+      if (rot && !reduce) {
+        var words = rot.querySelectorAll('span'), i = 0;
+        setInterval(function () {
+          var cur = words[i]; i = (i + 1) % words.length; var next = words[i];
+          cur.classList.remove('on'); cur.classList.add('off');
+          next.classList.remove('off'); next.classList.add('on');
+          setTimeout(function () { cur.classList.remove('off'); }, 650);
+        }, 2600);
+      }
+
+      // Rete di nodi animata sullo sfondo (richiama gli agenti collegati tra loro)
+      var canvas = document.getElementById('net');
+      var ctx = canvas.getContext && canvas.getContext('2d');
+      if (!ctx) return;
+      var dpr = Math.min(window.devicePixelRatio || 1, 2), w, h, nodes = [], mouse = { x: -9999, y: -9999 };
+      var accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#e04545';
+      function rgb(hex) { var n = parseInt(hex.replace('#', ''), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
+      var c = rgb(accent);
+      function resize() {
+        w = window.innerWidth; h = window.innerHeight;
+        canvas.width = w * dpr; canvas.height = h * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        // Numero di nodi proporzionale allo schermo, con un tetto per non pesare sulla CPU
+        var count = Math.min(60, Math.floor((w * h) / 24000));
+        nodes = [];
+        for (var k = 0; k < count; k++) {
+          nodes.push({ x: Math.random() * w, y: Math.random() * h, vx: (Math.random() - .5) * .28, vy: (Math.random() - .5) * .28, r: Math.random() * 1.6 + .6 });
+        }
+      }
+      function draw() {
+        ctx.clearRect(0, 0, w, h);
+        var max = 140;
+        for (var a = 0; a < nodes.length; a++) {
+          var p = nodes[a];
+          if (!reduce) {
+            p.x += p.vx; p.y += p.vy;
+            if (p.x < 0 || p.x > w) p.vx *= -1;
+            if (p.y < 0 || p.y > h) p.vy *= -1;
+          }
+          for (var b = a + 1; b < nodes.length; b++) {
+            var q = nodes[b], dx = p.x - q.x, dy = p.y - q.y, d = Math.sqrt(dx * dx + dy * dy);
+            if (d < max) {
+              ctx.strokeStyle = 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + (1 - d / max) * .22 + ')';
+              ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke();
+            }
+          }
+          var md = Math.hypot(p.x - mouse.x, p.y - mouse.y);
+          if (md < 180) {
+            ctx.strokeStyle = 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + (1 - md / 180) * .5 + ')';
+            ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(mouse.x, mouse.y); ctx.stroke();
+          }
+          ctx.fillStyle = 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',.8)';
+          ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+      var running = true;
+      function loop() { if (running) { draw(); requestAnimationFrame(loop); } }
+      resize();
+      window.addEventListener('resize', resize);
+      window.addEventListener('pointermove', function (e) { mouse.x = e.clientX; mouse.y = e.clientY; }, { passive: true });
+      document.addEventListener('visibilitychange', function () {
+        var vis = document.visibilityState === 'visible';
+        if (vis && !running && !reduce) { running = true; loop(); } else if (!vis) { running = false; }
+      });
+      if (reduce) { draw(); } else { loop(); }
+    })();
+  </script>
 </body>
 </html>

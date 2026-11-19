@@ -139,31 +139,55 @@ for (const p of config.products) {
 // --- pagina di ingresso ---
 fs.cpSync(path.join(ROOT, 'landing'), DIST, { recursive: true });
 const template = fs.readFileSync(path.join(DIST, 'index.html'), 'utf8');
+
+// Una card per prodotto. L'icona è l'iniziale del nome senza il prefisso "AION"
+// (es. "AION Agents" → "A"); "icon" in products.json la sostituisce.
+const arrow =
+  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>';
 const cards = built
-  .map(
-    (p) => `      <a class="card" href="/${p.path}/">
-        <h2>${escapeHtml(p.name)}</h2>
-        <p>${escapeHtml(p.description || '')}</p>
-        <span class="go">Apri la documentazione →</span>
-      </a>`
-  )
+  .map((p, i) => {
+    const icon = p.icon || p.name.replace(/^AION\s+/i, '').charAt(0).toUpperCase();
+    return `          <a class="card reveal" style="--d:${(i * 0.08).toFixed(2)}s" href="/${p.path}/">
+            <div class="card-top"><span class="card-icon">${escapeHtml(icon)}</span><span class="card-path">/${escapeHtml(p.path)}/</span></div>
+            <h3>${escapeHtml(p.name)}</h3>
+            <p>${escapeHtml(p.description || '')}</p>
+            <span class="card-go">Apri la documentazione ${arrow}</span>
+          </a>`;
+  })
   .join('\n');
-const landing = template.replace('{{CARDS}}', cards).replace('{{YEAR}}', String(new Date().getFullYear()));
-fs.writeFileSync(path.join(DIST, 'index.html'), landing);
+
+// Riempie i segnaposto {{...}} del modello landing/index.html
+const fill = (vars) => template.replace(/\{\{(\w+)\}\}/g, (m, k) => (k in vars ? vars[k] : m));
+const common = { CARDS: cards, YEAR: String(new Date().getFullYear()) };
+
+fs.writeFileSync(
+  path.join(DIST, 'index.html'),
+  fill({
+    ...common,
+    PAGE_CLASS: 'is-home',
+    TITLE: 'Documentazione AION',
+    ROBOTS: '',
+    HERO_TITLE:
+      'La documentazione <span class="grad">AION</span><span class="rotator-wrap"><br><span class="rotator">' +
+      '<span class="on">per utenti</span><span>per amministratori</span><span>per sviluppatori</span></span></span>',
+    HERO_TEXT:
+      'Guide, configurazione, API e integrazioni di tutti i prodotti AION, in un unico posto. Scegli un prodotto e inizia.',
+  })
+);
 
 // --- pagina 404 ---
 // Vercel mostra solo /404.html (alla radice) per qualunque percorso inesistente,
 // anche dentro /<prodotto>/: stessa grafica della landing, con i link ai prodotti
 fs.writeFileSync(
   path.join(DIST, '404.html'),
-  landing
-    .replace('<title>Documentazione AION</title>', '<title>Pagina non trovata · Documentazione AION</title>')
-    .replace('<meta name="description"', '<meta name="robots" content="noindex">\n  <meta name="description"')
-    .replace('<h1>Documentazione AION</h1>', '<h1>Pagina non trovata</h1>')
-    .replace(
-      '<p>Scegli il prodotto di cui vuoi consultare la documentazione.</p>',
-      '<p>La pagina che cerchi non esiste o è stata spostata. Riparti dalla documentazione del prodotto.</p>'
-    )
+  fill({
+    ...common,
+    PAGE_CLASS: 'is-404',
+    TITLE: 'Pagina non trovata · Documentazione AION',
+    ROBOTS: '<meta name="robots" content="noindex">',
+    HERO_TITLE: 'Pagina <span class="grad">non trovata</span>',
+    HERO_TEXT: 'La pagina che cerchi non esiste o è stata spostata. Riparti dalla documentazione del prodotto.',
+  })
 );
 
 // --- sitemap indice + robots ---
