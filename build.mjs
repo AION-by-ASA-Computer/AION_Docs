@@ -151,7 +151,7 @@ const cards = built
             <div class="card-top"><span class="card-icon">${escapeHtml(icon)}</span><span class="card-path">/${escapeHtml(p.path)}/</span></div>
             <h3>${escapeHtml(p.name)}</h3>
             <p>${escapeHtml(p.description || '')}</p>
-            <span class="card-go">Apri la documentazione ${arrow}</span>
+            <span class="card-go">Open the documentation ${arrow}</span>
           </a>`;
   })
   .join('\n');
@@ -165,13 +165,14 @@ fs.writeFileSync(
   fill({
     ...common,
     PAGE_CLASS: 'is-home',
-    TITLE: 'Documentazione AION',
+    TITLE: 'AION Documentation',
     ROBOTS: '',
+    // La parola in corsivo viene "scritta a macchina" a rotazione (vedi data-words nel modello)
     HERO_TITLE:
-      'La documentazione <span class="grad">AION</span><span class="rotator-wrap"><br><span class="rotator">' +
-      '<span class="on">per utenti</span><span>per amministratori</span><span>per sviluppatori</span></span></span>',
+      'The AION documentation<br>for <span class="serif-word" data-words="users|administrators|developers">users</span>' +
+      '<span class="caret" aria-hidden="true"></span>',
     HERO_TEXT:
-      'Guide, configurazione, API e integrazioni di tutti i prodotti AION, in un unico posto. Scegli un prodotto e inizia.',
+      'Guides, configuration, APIs and integrations for every AION product, in one place. Pick a product and get started.',
   })
 );
 
@@ -183,10 +184,10 @@ fs.writeFileSync(
   fill({
     ...common,
     PAGE_CLASS: 'is-404',
-    TITLE: 'Pagina non trovata · Documentazione AION',
+    TITLE: 'Page not found · AION Documentation',
     ROBOTS: '<meta name="robots" content="noindex">',
-    HERO_TITLE: 'Pagina <span class="grad">non trovata</span>',
-    HERO_TEXT: 'La pagina che cerchi non esiste o è stata spostata. Riparti dalla documentazione del prodotto.',
+    HERO_TITLE: 'Page <span class="serif-word">not found</span><span class="caret" aria-hidden="true"></span>',
+    HERO_TEXT: "The page you are looking for doesn't exist or has been moved. Start again from a product's documentation.",
   })
 );
 
