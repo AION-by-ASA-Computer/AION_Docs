@@ -8,7 +8,13 @@
       "siteDir": "website",
       "path": "agents",
       "name": "AION Agents",
-      "description": "Guide for users, administrators and developers of AION Agents: installation, configuration, APIs and integrations."
+      "description": "Guide for users, administrators and developers of AION Agents: installation, configuration, APIs and integrations.",
+      "links": [
+        { "label": "Quickstart", "href": "getting-started/quickstart" },
+        { "label": "User guide", "href": "user-guide/using-the-chat" },
+        { "label": "Administrator guide", "href": "admin-guide/checklist" },
+        { "label": "API: your first call", "href": "api-guide/first-api-call" }
+      ]
     }
   ]
 }

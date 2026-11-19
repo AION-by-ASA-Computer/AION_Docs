@@ -140,25 +140,63 @@ for (const p of config.products) {
 fs.cpSync(path.join(ROOT, 'landing'), DIST, { recursive: true });
 const template = fs.readFileSync(path.join(DIST, 'index.html'), 'utf8');
 
+// Link rapidi di un prodotto ("links" in products.json, facoltativo): tengo solo quelli
+// che puntano a una pagina esistente nella build, così un link rotto non finisce online
+function quickLinks(p) {
+  return (p.links || []).filter((l) => {
+    const rel = String(l.href || '').replace(/^\/+|\/+$/g, '');
+    const base = path.join(DIST, p.path, rel);
+    const ok = [path.join(base, 'index.html'), `${base}.html`].some((f) => fs.existsSync(f));
+    if (!ok) console.warn(`ATTENZIONE: ${p.repo}: il link rapido "${l.label}" (${l.href}) non esiste, lo salto`);
+    return ok;
+  });
+}
+
 // Una card per prodotto. L'icona è l'iniziale del nome senza il prefisso "AION"
 // (es. "AION Agents" → "A"); "icon" in products.json la sostituisce.
 const arrow =
   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>';
+const chevron =
+  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>';
 const cards = built
   .map((p, i) => {
     const icon = p.icon || p.name.replace(/^AION\s+/i, '').charAt(0).toUpperCase();
-    return `          <a class="card reveal" style="--d:${(i * 0.08).toFixed(2)}s" href="/${p.path}/">
-            <div class="card-top"><span class="card-icon">${escapeHtml(icon)}</span><span class="card-path">/${escapeHtml(p.path)}/</span></div>
-            <h3>${escapeHtml(p.name)}</h3>
-            <p>${escapeHtml(p.description || '')}</p>
-            <span class="card-go">Open the documentation ${arrow}</span>
-          </a>`;
+    const links = quickLinks(p)
+      .map((l) => {
+        const href = `/${p.path}/${String(l.href).replace(/^\/+/, '')}`;
+        return `                <li><a href="${escapeHtml(href)}">${escapeHtml(l.label)} ${chevron}</a></li>`;
+      })
+      .join('\n');
+    return `          <article class="card reveal" style="--d:${(i * 0.08).toFixed(2)}s">
+            <div class="card-body">
+              <div class="card-main">
+                <div class="card-top">
+                  <span class="card-icon">${escapeHtml(icon)}</span>
+                  <div><h3><a href="/${p.path}/">${escapeHtml(p.name)}</a></h3><span class="card-path">docs.aion-asa.com/${escapeHtml(p.path)}</span></div>
+                </div>
+                <p>${escapeHtml(p.description || '')}</p>
+              </div>${links ? `\n              <ul class="quick">\n${links}\n              </ul>` : ''}
+            </div>
+            <a class="card-go" href="/${p.path}/">Open the ${escapeHtml(p.name)} docs ${arrow}</a>
+          </article>`;
   })
+  .join('\n');
+
+// Prodotti tra cui scegliere nella ricerca (il selettore si nasconde se c'è un solo prodotto)
+const options = built
+  .map((p) => `              <option value="${escapeHtml(p.path)}">${escapeHtml(p.name)}</option>`)
   .join('\n');
 
 // Riempie i segnaposto {{...}} del modello landing/index.html
 const fill = (vars) => template.replace(/\{\{(\w+)\}\}/g, (m, k) => (k in vars ? vars[k] : m));
-const common = { CARDS: cards, YEAR: String(new Date().getFullYear()) };
+const common = {
+  CARDS: cards,
+  PRODUCT_OPTIONS: options,
+  SELECT_CLASS: built.length > 1 ? '' : 'single',
+  FIRST_PATH: built[0]?.path || '',
+  PRODUCT_COUNT: `${built.length} ${built.length === 1 ? 'product' : 'products'}`,
+  YEAR: String(new Date().getFullYear()),
+};
 
 fs.writeFileSync(
   path.join(DIST, 'index.html'),
@@ -167,12 +205,9 @@ fs.writeFileSync(
     PAGE_CLASS: 'is-home',
     TITLE: 'AION Documentation',
     ROBOTS: '',
-    // La parola in corsivo viene "scritta a macchina" a rotazione (vedi data-words nel modello)
-    HERO_TITLE:
-      'The AION documentation<br>for <span class="serif-word" data-words="users|administrators|developers">users</span>' +
-      '<span class="caret" aria-hidden="true"></span>',
+    HERO_TITLE: 'AION <span class="serif-word">Documentation</span>',
     HERO_TEXT:
-      'Guides, configuration, APIs and integrations for every AION product, in one place. Pick a product and get started.',
+      'Guides for users, administrators and developers: installation, configuration, APIs and integrations for every AION product.',
   })
 );
 
@@ -186,8 +221,8 @@ fs.writeFileSync(
     PAGE_CLASS: 'is-404',
     TITLE: 'Page not found · AION Documentation',
     ROBOTS: '<meta name="robots" content="noindex">',
-    HERO_TITLE: 'Page <span class="serif-word">not found</span><span class="caret" aria-hidden="true"></span>',
-    HERO_TEXT: "The page you are looking for doesn't exist or has been moved. Start again from a product's documentation.",
+    HERO_TITLE: 'Page <span class="serif-word">not found</span>',
+    HERO_TEXT: "The page you are looking for doesn't exist or has been moved. Search the documentation or start again from a product.",
   })
 );
 
